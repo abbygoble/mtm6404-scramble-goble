@@ -13,32 +13,32 @@ console.log('Hello World')
  * @Parameters: Array or string
  * @Return: Scrambled Array or string, based on the provided parameter
  */
- function shuffle (src) {
+function shuffle(src) {
     const copy = [...src]
-  
+
     const length = copy.length
     for (let i = 0; i < length; i++) {
-      const x = copy[i]
-      const y = Math.floor(Math.random() * length)
-      const z = copy[y]
-      copy[i] = z
-      copy[y] = x
+        const x = copy[i]
+        const y = Math.floor(Math.random() * length)
+        const z = copy[y]
+        copy[i] = z
+        copy[y] = x
     }
-  
+
     if (typeof src === 'string') {
-      return copy.join('')
+        return copy.join('')
     }
-  
+
     return copy
-  }
-  
-  /**********************************************
+}
+
+/**********************************************
  * YOUR CODE BELOW
  **********************************************/
-  const { useState, useEffect } = React
+const { useState, useEffect } = React
 
-  const words = [
-    'arrowroot', 
+const words = [
+    'arrowroot',
     'barbell',
     'crocodile',
     'destination',
@@ -50,30 +50,33 @@ console.log('Hello World')
     'jail'
 ]
 
-function ScrambleGame () {
+function ScrambleGame() {
     const [wordList, setWordList] = useState([...words])
-    const [current, setCurrent] = useState(shuffle([...words])[0])
-    const [wordScramble, setWordScramble] = useState(shuffle(current))
+    const [current, setCurrent] = useState(() => {
+        const shuffledWords = shuffle([...words])
+        return shuffledWords[0]
+    })
+    const [wordScramble, setWordScramble] = useState(() => shuffle(current))
     const [guess, setGuess] = useState("")
     const [score, setScore] = useState(0)
     const [strike, setStrike] = useState(0)
     const [pass, setPass] = useState(3)
 
     useEffect(() => {
-    const storedState = localStorage.getItem('scrambleGameState')
-    if (storedState) {
-        const { savedWordList, savedCurrent, savedWordScramble, savedScore, savedStrike, savedPass} = JSON.parse(storedState)
-        setWordList(savedWordList)
-        setCurrent(savedCurrent)
-        setWordScramble(savedWordScramble)
-        setScore(savedScore)
-        setStrike(savedStrike)
-        setPass(savedPass)
-    }
+        const storedState = localStorage.getItem('scrambleGameState')
+        if (storedState) {
+            const { savedWordList, savedCurrent, savedWordScramble, savedScore, savedStrike, savedPass } = JSON.parse(storedState)
+            setWordList(savedWordList)
+            setCurrent(savedCurrent)
+            setWordScramble(savedWordScramble)
+            setScore(savedScore)
+            setStrike(savedStrike)
+            setPass(savedPass)
+        }
     }, [])
 
     useEffect(() => {
-        localStorage.setItem('scrambleGameState', JSON.stringify({wordList, current, wordScramble, score, strike, pass}))
+        localStorage.setItem('scrambleGameState', JSON.stringify({ wordList, current, wordScramble, score, strike, pass }))
     }, [wordList, current, wordScramble, score, strike, pass])
 
     const guessDealer = (e) => {
@@ -105,7 +108,7 @@ function ScrambleGame () {
             setPass(pass - 1)
             const newWordList = wordList.filter(word => word !== current)
             if (newWordList.length > 0) {
-                const newWord = shuffle(newWordList) [0]
+                const newWord = shuffle(newWordList)[0]
                 setWordList(newWordList)
                 setCurrent(newWord)
                 setWordScramble(shuffle(newWord))
@@ -130,7 +133,7 @@ function ScrambleGame () {
     return (
         <div>
             <h1>Play Our Scramble Game</h1>
-            <p>There's a collection of words for you to spell out - but they've been scrambled past the point of recognition.  Do you have what it takes to spell it out?</p>
+            <p>There's a collection of words for you to spell out - but they've been scrambled past the point of recognition. Do you have what it takes to spell it out?</p>
             <p>Your Scrambled Word is: {wordScramble}</p>
             <form onSubmit={guessDealer}>
                 <input type="text" value={guess} onChange={(e) => setGuess(e.target.value)} />
@@ -142,9 +145,7 @@ function ScrambleGame () {
             <button onClick={resetGame}>Restart the Game</button>
         </div>
     )
-
 }
 
-
-  const root = ReactDOM.createRoot(document.getElementById('root'))
-  root.render(<ScrambleGame />)
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(<ScrambleGame />)
