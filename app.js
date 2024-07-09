@@ -32,27 +32,119 @@ console.log('Hello World')
     return copy
   }
   
-  const fruit = 'banana'
-const fruits = ['strawberries', 'apples', 'bananas']
-
-console.log(shuffle(fruit))
-console.log(shuffle(fruits))
-
   /**********************************************
  * YOUR CODE BELOW
  **********************************************/
+  const { useState, useEffect } = React
 
-//   const words = [
-//     'arrowroot', 
-//     'barbell',
-//     'crocodile',
-//     'destination',
-//     'elephant',
-//     'firetruck',
-//     'goose',
-//     'helicopter',
-//     'intelligent',
-//     'jail'
-// ]
+  const words = [
+    'arrowroot', 
+    'barbell',
+    'crocodile',
+    'destination',
+    'elephant',
+    'firetruck',
+    'goose',
+    'helicopter',
+    'intelligent',
+    'jail'
+]
 
-//   ReactDOM.render(document.getElementById('root'))
+function ScrambleGame () {
+    const [wordList, setWordList] = useState([...words])
+    const [current, setCurrent] = useState(shuffle([...words])[0])
+    const [wordScramble, setWordScramble] = useState(shuffle(current))
+    const [guess, setGuess] = useState("")
+    const [score, setScore] = useState(0)
+    const [strike, setStrike] = useState(0)
+    const [pass, setPass] = useState(3)
+
+    useEffect(() => {
+    const storedState = localStorage.getItem('scrambleGameState')
+    if (storedState) {
+        const { savedWordList, savedCurrent, savedWordScramble, savedScore, savedStrike, savedPass} = JSON.parse(storedState)
+        setWordList(savedWordList)
+        setCurrent(savedCurrent)
+        setWordScramble(savedWordScramble)
+        setScore(savedScore)
+        setStrike(savedStrike)
+        setPass(savedPass)
+    }
+    }, [])
+
+    useEffect(() => {
+        localStorage.setItem('scrambleGameState', JSON.stringify({wordList, current, wordScramble, score, strike, pass}))
+    }, [wordList, current, wordScramble, score, strike, pass])
+
+    const guessDealer = (e) => {
+        e.preventDefault()
+        if (guess.toLowerCase() === current.toLowerCase()) {
+            setScore(score + 1)
+            const newWordList = wordList.filter(word => word !== current)
+            if (newWordList.length > 0) {
+                const newWord = shuffle(newWordList)[0]
+                setWordList(newWordList)
+                setCurrent(newWord)
+                setWordScramble(shuffle(newWord))
+            } else {
+                alert(`All Spelled Out! You scored ${score + 1} points.`)
+                resetGame()
+            }
+        } else {
+            setStrike(strike + 1)
+            if (strike + 1 >= 3) {
+                alert(`All Spelled Out! You received ${strike + 1} strikes.`)
+                resetGame()
+            }
+        }
+        setGuess("")
+    }
+
+    const passDealer = () => {
+        if (pass > 0) {
+            setPass(pass - 1)
+            const newWordList = wordList.filter(word => word !== current)
+            if (newWordList.length > 0) {
+                const newWord = shuffle(newWordList) [0]
+                setWordList(newWordList)
+                setCurrent(newWord)
+                setWordScramble(shuffle(newWord))
+            } else {
+                alert(`All Spelled Out! You scored ${score} points.`)
+            }
+        }
+    }
+
+    const resetGame = () => {
+        setWordList([...words])
+        const newWord = shuffle([...words])[0]
+        setCurrent(newWord)
+        setWordScramble(shuffle(newWord))
+        setGuess('')
+        setScore(0)
+        setStrike(0)
+        setPass(3)
+        localStorage.removeItem('scrambleGameState')
+    }
+
+    return (
+        <div>
+            <h1>Play Our Scramble Game</h1>
+            <p>There's a collection of words for you to spell out - but they've been scrambled past the point of recognition.  Do you have what it takes to spell it out?</p>
+            <p>Your Scrambled Word is: {wordScramble}</p>
+            <form onSubmit={guessDealer}>
+                <input type="text" value={guess} onChange={(e) => setGuess(e.target.value)} />
+                <button type="submit">Submit your Guess</button>
+            </form>
+            <button onClick={passDealer} disabled={pass <= 0}>Pass</button>
+            <p>Points: {score}</p>
+            <p>Strikes: {strike}</p>
+            <button onClick={resetGame}>Restart the Game</button>
+        </div>
+    )
+
+}
+
+
+  const root = ReactDOM.createRoot(document.getElementById('root'))
+  root.render(<ScrambleGame />)
