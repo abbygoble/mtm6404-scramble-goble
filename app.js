@@ -121,7 +121,7 @@ function ScrambleGame() {
         }
         setGuess("")
     }
-
+    
     const resetGame = () => {
         setWordList([...words])
         const newWord = shuffle([...words])[0]
